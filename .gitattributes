@@ -1,0 +1,7 @@
+# 一律以 LF 入库，检出时不自动转成 CRLF。
+# 技能脚本写回源码时会自行探测并保持目标文件原有的 CRLF/LF，与本设置无关。
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

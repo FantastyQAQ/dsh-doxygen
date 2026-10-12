@@ -1,0 +1,5 @@
+# 解析 C/C++ 签名所需（parse_function.py / gen_doxygen.py）
+# 实测可用组合：tree-sitter 0.26.0 + tree-sitter-cpp 0.23.4
+# 脚本对 0.22 前后的 Language/Parser 构造 API 均做了兼容
+tree-sitter>=0.22
+tree-sitter-cpp>=0.21

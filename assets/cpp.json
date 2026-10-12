@@ -1,0 +1,82 @@
+{
+	"doxygen格式源文件注释": {
+		"prefix": "doxygen_source",
+		"body": [
+			"/**",
+			" * @file        $TM_FILENAME",
+			" * @brief       $0",
+			" * @author      ${1:Your Name}",
+			" * @version     1.0",
+			" * @date        $CURRENT_YEAR$CURRENT_MONTH$CURRENT_DATE",
+			" * @warning     $2",
+			" * @note        $3",
+			" * ",
+			" * @copyright   Copyright (c) $CURRENT_YEAR by ${4:Your Company}, All Rights Reserved.",
+			" * ",
+			" * @par         修改日志:",
+			" * <table>",
+			" * <tr><th>Date        <th>Version   <th>Author    <th>Description",
+			" * <tr><td>$CURRENT_YEAR$CURRENT_MONTH$CURRENT_DATE    <td>1.0       <td>${5:Your Name} <td>$6",
+			" * </table>",
+			" */"
+		],
+		"description": "doxygen格式源文件注释"
+	},
+	"doxygen格式函数注释": {
+		"prefix": "doxygen_fun",
+		"body": [
+			"/**",
+			" * @brief       $0",
+			" * ",
+			" * @param[in]   {$1} $2 $3",
+			" * @param[out]  {$4} $5 $6",
+			" * @return      none",
+			" *        -     $7",
+			" * @retval      $8",
+			" * @todo        none",
+			" * @details     none",
+			" */"
+		],
+		"description": "doxygen格式函数注释"
+	},
+	"doxygen格式模块注释开头": {
+		"prefix": "doxygen_module_head",
+		"body": [
+			"/**",
+			" * @defgroup RTC_mouble RTC",
+			" * ",
+			" * $0",
+			" * $1",
+			" * @{",
+			" */"
+		],
+		"description": "doxygen格式模块注释开头"
+	},
+	"doxygen格式模块注释结尾": {
+		"prefix": "doxygen_module_end",
+		"body": [
+			"/**",
+			" * @}",
+			" * ",
+			" */"
+		],
+		"description": "doxygen格式模块注释结尾"
+	},
+	"doxygen分号后面注释": {
+		"prefix": "doxygen_rear",
+		"body": [
+			"/**< $0 */"
+		],
+		"description": "doxygen分号后面注释"
+	},
+	"doxygen常用注释": {
+		"prefix": "doxygen_nom",
+		"body": [
+			"/**",
+			" * @brief       $0",
+			" * ",
+			" */"
+		],
+		"description": "doxygen常用注释"
+	}
+}
