@@ -35,6 +35,9 @@ doxygen-comment/
 ├── README.md                 # this file
 ├── LICENSE                   # MIT
 ├── requirements.txt          # Python dependencies
+├── package.json              # DSH plugin manifest — declares dsh.bundle
+├── cordis.patch.yml          # plugin insert row (id: doxygen-comment, name: dsh-doxygen)
+├── index.js                  # registers the bundled skill when installed as a plugin
 ├── assets/
 │   └── cpp.json              # the six templates as editor snippets (optional)
 ├── references/
@@ -56,22 +59,20 @@ git clone https://github.com/FantastyQAQ/dsh-doxygen.git
 The repository is named `dsh-doxygen` while the skill is named `doxygen-comment`: when you drop it into
 a skills directory, **name the directory `doxygen-comment`**.
 
-### 2. Dependencies
+### 2. Install it
 
-Python 3.10+ is required:
+Two ways in — as a DSH plugin bundle, or by copying the folder into a skills directory.
+
+**As a DSH plugin.** The repository root declares `dsh.bundle`, so it installs like any other plugin:
 
 ```bash
-pip install -r requirements.txt
-# equivalent: pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
+dsh plugin add github:FantastyQAQ/dsh-doxygen
 ```
 
-Tested with `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`; the scripts support the `Language`/`Parser`
-construction API both before and after 0.22. On Windows, always type `python` (`python3` is an alias
-trap in some environments).
+`index.js` registers `SKILL.md` as the `doxygen-comment` skill and resolves `${SKILL_DIR}` for you,
+so no path guessing is needed.
 
-### 3. Drop it into a skills directory
-
-The folder is self-contained — copy the whole directory and it works; the scripts contain no
+**By copying the folder.** The directory is self-contained; the scripts contain no
 project-specific paths:
 
 | Host | Skills directory |
@@ -84,6 +85,19 @@ project-specific paths:
 # e.g. install for Claude Code at user level
 git clone https://github.com/FantastyQAQ/dsh-doxygen.git "$env:USERPROFILE\.claude\skills\doxygen-comment"
 ```
+
+### 3. Dependencies
+
+Python 3.10+ is required:
+
+```bash
+pip install -r requirements.txt
+# equivalent: pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
+```
+
+Tested with `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`; the scripts support the `Language`/`Parser`
+construction API both before and after 0.22. On Windows, always type `python` (`python3` is an alias
+trap in some environments).
 
 ### 4. Verify
 
@@ -302,6 +316,9 @@ doxygen-comment/
 ├── README.md                 # 本文件
 ├── LICENSE                   # MIT
 ├── requirements.txt          # Python 依赖
+├── package.json              # DSH 插件清单——声明 dsh.bundle
+├── cordis.patch.yml          # 插件注册行（id: doxygen-comment，name: dsh-doxygen）
+├── index.js                  # 以插件方式安装时注册本技能
 ├── assets/
 │   └── cpp.json              # 六套模板的编辑器片段（可选安装）
 ├── references/
@@ -322,21 +339,19 @@ git clone https://github.com/FantastyQAQ/dsh-doxygen.git
 
 仓库名是 `dsh-doxygen`，技能名仍是 `doxygen-comment`：放进宿主技能目录时**目录名请用 `doxygen-comment`**。
 
-#### 2. 依赖
+#### 2. 安装
 
-需要 Python 3.10+：
+两种方式：装成 DSH 插件，或整目录复制进技能目录。
+
+**装成 DSH 插件**（DeepSeek Harness）：仓库根声明了 `dsh.bundle`，按普通插件安装即可：
 
 ```bash
-pip install -r requirements.txt
-# 等价写法：pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
+dsh plugin add github:FantastyQAQ/dsh-doxygen
 ```
 
-实测组合 `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`；脚本对 0.22 前后的 `Language`/`Parser`
-构造 API 都做了兼容。Windows 下统一写 `python`（`python3` 在部分环境是别名陷阱）。
+`index.js` 会把 `SKILL.md` 注册为 `doxygen-comment` 技能，并自动注入 `${SKILL_DIR}`，不必自己找路径。
 
-#### 3. 放进宿主的技能目录
-
-整目录复制即可，脚本不含任何工程硬编码：
+**整目录复制**：目录自包含，脚本不含任何工程硬编码：
 
 | 宿主 | 技能目录 |
 |---|---|
@@ -348,6 +363,18 @@ pip install -r requirements.txt
 # 例：装到 Claude Code 用户级技能目录
 git clone https://github.com/FantastyQAQ/dsh-doxygen.git "$env:USERPROFILE\.claude\skills\doxygen-comment"
 ```
+
+#### 3. 依赖
+
+需要 Python 3.10+：
+
+```bash
+pip install -r requirements.txt
+# 等价写法：pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
+```
+
+实测组合 `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`；脚本对 0.22 前后的 `Language`/`Parser`
+构造 API 都做了兼容。Windows 下统一写 `python`（`python3` 在部分环境是别名陷阱）。
 
 #### 4. 验证
 

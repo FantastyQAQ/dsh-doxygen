@@ -1,0 +1,3 @@
+- insert:
+    - id: doxygen-comment
+      name: dsh-doxygen

@@ -18,9 +18,11 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 脚本相对本文件位于 `scripts/`。下文所有脚本路径都写成 `${SKILL_DIR}/scripts/...`，
 其中 `${SKILL_DIR}` 是**本 SKILL.md 所在目录的绝对路径**，按顺序取值：
 
-1. 宿主注入的技能目录变量 —— 如 CodeBuddy 的 `${CODEBUDDY_SKILL_DIR}`、Claude Code 的
+1. 正文开头若带有「运行时路径」提示行（DSH 以插件方式安装时由 `index.js` 注入），
+   直接采用其中的绝对路径；
+2. 宿主注入的技能目录变量 —— 如 CodeBuddy 的 `${CODEBUDDY_SKILL_DIR}`、Claude Code 的
    `${CLAUDE_SKILL_DIR}`，或宿主等价物；
-2. 否则用本 SKILL.md 自身的绝对路径（技能被 `~/.dsh/skills/` 一类目录加载时，
+3. 否则用本 SKILL.md 自身的绝对路径（技能被 `~/.dsh/skills/` 一类目录加载时，
    该路径即 `<技能根>/doxygen-comment`）。
 
 拿到绝对路径后，命令不受工作目录、盘符、clone 位置影响：
@@ -33,10 +35,11 @@ GEN="${SKILL_DIR}/scripts/gen_doxygen.py"
 若两者都拿不到（宿主只认相对路径），依次在下列目录下找
 `doxygen-comment/scripts/parse_function.py`，用第一个存在的作为 `${SKILL_DIR}`：
 
-1. `~/.dsh/skills`（DeepSeek Harness）
-2. `~/.claude/skills`（Claude Code）
-3. `~/.codebuddy/skills`、`~/.workbuddy/skills`（CodeBuddy 系）
-4. 当前工程的 `.claude/skills`、`.codebuddy/skills`、`.trae/skills`
+1. `~/.dsh/skills`（DeepSeek Harness，手工安装）
+2. `~/.dsh/profiles/*/node_modules/dsh-doxygen`（DeepSeek Harness，插件安装）
+3. `~/.claude/skills`（Claude Code）
+4. `~/.codebuddy/skills`、`~/.workbuddy/skills`（CodeBuddy 系）
+5. 当前工程的 `.claude/skills`、`.codebuddy/skills`、`.trae/skills`
 
 安装方法见 `README.md`；脚本不含任何工程硬编码，换工程后无需重装。
 
@@ -426,7 +429,12 @@ python "${SKILL_DIR}/scripts/install_snippets.py" --uninstall --apply
 ## 安装与分发
 
 本技能是一份自包含目录（`SKILL.md` + `scripts/` + `references/` + `assets/`），
-整目录复制到宿主的技能目录即可用；两个 `.py` 里不含任何工程硬编码，换工程无需重装。
+两种安装方式都可用；脚本里不含任何工程硬编码，换工程无需重装：
+
+| 方式 | 做法 |
+|---|---|
+| DSH 插件 | `dsh plugin add github:FantastyQAQ/dsh-doxygen` —— 仓库根的 `package.json` 声明了 `dsh.bundle`，`index.js` 注册本技能并注入「运行时路径」 |
+| 手工安装 | 把整个目录复制到下表任一个技能目录（目录名用 `doxygen-comment`） |
 
 | 宿主 | 技能目录 |
 |---|---|
@@ -434,8 +442,8 @@ python "${SKILL_DIR}/scripts/install_snippets.py" --uninstall --apply
 | Claude Code | `~/.claude/skills/doxygen-comment/`，或工程的 `.claude/skills/` |
 | CodeBuddy CN / WorkBuddy | `~/.codebuddy/skills/doxygen-comment/`、`~/.workbuddy/skills/doxygen-comment/` |
 
-**升级方式**：用新版本整目录覆盖旧目录，`SKILL.md` 与 `scripts/`、`assets/`、`references/`
-要一起更新，避免模板和脚本版本对不上。
+**升级方式**：插件安装重新执行上面的 `dsh plugin add`；手工安装用新版本整目录覆盖。
+两种方式都要让 `SKILL.md` 与 `scripts/`、`assets/`、`references/` 一起更新，避免模板和脚本版本对不上。
 
 源码仓库：<https://github.com/FantastyQAQ/dsh-doxygen>（仓库名 `dsh-doxygen`，技能目录名仍用 `doxygen-comment`）。
 
