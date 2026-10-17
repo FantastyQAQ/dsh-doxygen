@@ -88,11 +88,12 @@ git clone https://github.com/FantastyQAQ/dsh-doxygen.git "$env:USERPROFILE\.clau
 
 ### 3. Dependencies
 
-Python 3.10+ is required:
+Requires Python 3.10+; install the C/C++ parser with `pip install tree-sitter tree-sitter-cpp`:
 
 ```bash
+pip install tree-sitter tree-sitter-cpp
+# or the version-constrained install from this repo:
 pip install -r requirements.txt
-# equivalent: pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
 ```
 
 Tested with `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`; the scripts support the `Language`/`Parser`
@@ -366,11 +367,12 @@ git clone https://github.com/FantastyQAQ/dsh-doxygen.git "$env:USERPROFILE\.clau
 
 #### 3. 依赖
 
-需要 Python 3.10+：
+需要 Python 3.10+，用 `pip install tree-sitter tree-sitter-cpp` 安装 C/C++ 解析依赖：
 
 ```bash
+pip install tree-sitter tree-sitter-cpp
+# 或使用本仓库的固定下限写法：
 pip install -r requirements.txt
-# 等价写法：pip install "tree-sitter>=0.22" "tree-sitter-cpp>=0.21"
 ```
 
 实测组合 `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`；脚本对 0.22 前后的 `Language`/`Parser`
