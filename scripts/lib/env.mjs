@@ -140,29 +140,53 @@ function runCandidate({ command, args }) {
   }
 }
 
+// Preference among interpreters that were found but are not directly usable:
+// 2 = the interpreter runs and only the parser modules are missing (fixable
+// with one pip command), 1 = the interpreter is too old (needs an upgrade).
+// Trying every candidate matters on Windows, where `python` is often an old
+// install while `py -3` is the current one; stopping at the first "found"
+// candidate would report "too old" on a machine that already has a working
+// interpreter further down the list.
+function usableRank(attempt) {
+  if (attempt.versionOk && attempt.missing.length === 0) return 3
+  return attempt.versionOk ? 2 : 1
+}
+
 /**
  * Probe the machine. Returns
  * `{ ok, status, command, version, exe, missing, errors, attempts }` where status
  * is one of `ok | no-python | too-old | missing-modules | broken-python`.
+ *
+ * Every candidate is tried: a usable interpreter anywhere wins outright;
+ * otherwise the most usable candidate found is reported. A candidate that
+ * exists but cannot run `-c` does not stop the scan either — an old broken
+ * install can sit on PATH ahead of a working interpreter.
  */
 export function probePython() {
   const attempts = []
+  const found = []
+  let broken
   for (const candidate of pythonCandidates()) {
     const attempt = runCandidate(candidate)
     attempts.push(attempt)
     if (attempt.kind === 'found') {
       const { kind: _kind, ...facts } = attempt
       const base = { ...facts, attempts, ok: false }
-      if (!attempt.versionOk) return { ...base, status: 'too-old' }
-      if (attempt.missing.length) return { ...base, status: 'missing-modules' }
-      return { ...base, ok: true, status: 'ok' }
+      if (usableRank(attempt) === 3) return { ...base, ok: true, status: 'ok' }
+      found.push({ attempt, base })
+      continue
     }
-    if (attempt.kind === 'broken') {
-      // The command exists but cannot execute `-c`; stop probing, this is the
-      // interpreter the user has and it needs fixing.
-      return { ...attempt, attempts, ok: false, status: 'broken-python' }
+    if (attempt.kind === 'broken' && !broken) broken = attempt
+  }
+  if (found.length) {
+    const best = found.reduce((a, b) => (usableRank(b.attempt) > usableRank(a.attempt) ? b : a))
+    return {
+      ...best.base,
+      attempts,
+      status: best.attempt.versionOk ? 'missing-modules' : 'too-old',
     }
   }
+  if (broken) return { ...broken, attempts, ok: false, status: 'broken-python' }
   return {
     ok: false,
     status: 'no-python',
