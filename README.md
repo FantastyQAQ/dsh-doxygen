@@ -24,6 +24,11 @@ when the code changes**.
   `*`/`&` placement) do not change the fingerprint.
 - **Nothing is written by default.** A diff is printed first; `--write` applies it while preserving the
   target file's CRLF/LF style and its UTF-8 / UTF-8-BOM / GBK encoding.
+- **Fails fast on a machine without Python.** The plugin probes Python 3.10+ and `tree-sitter` at
+  registration and puts the verdict at the top of the skill body; on a missing or broken interpreter the
+  skill instructs the agent to stop and hand over the install steps instead of letting a shell error turn
+  into a fake "function not found". `node scripts/check_env.mjs` runs the same probe on demand — it is
+  plain Node, so it works where Python does not.
 - **CJK-text friendly.** The scripts force UTF-8 output, avoiding the mojibake a GBK Windows console
   would otherwise cause.
 
@@ -45,7 +50,10 @@ doxygen-comment/
 └── scripts/
     ├── parse_function.py     # read: locate a function + parse its signature (no side effects)
     ├── gen_doxygen.py        # write: render / insert / complete / fingerprint / diff / scan
-    └── install_snippets.py   # optional: merge the snippets into a VS Code style IDE
+    ├── install_snippets.py   # optional: merge the snippets into a VS Code style IDE
+    ├── check_env.mjs         # environment preflight (Node, works without Python)
+    └── lib/
+        └── env.mjs           # the probe behind check_env.mjs; also used by index.js
 ```
 
 ## Installation
@@ -104,13 +112,28 @@ Tested with `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`; the scripts support
 construction API both before and after 0.22. On Windows, always type `python` (`python3` is an alias
 trap in some environments).
 
+**When Python is missing, the plugin says so instead of failing mid-command.** The bundle probes the
+machine once when it registers the skill and puts the verdict at the top of the skill body; a failing
+verdict tells the agent to stop and hand the install steps to you. The probe is plain Node (Node ships
+with DSH), so it can report "no Python" on the very machines where no Python exists:
+
+```bash
+node scripts/check_env.mjs           # human readable, exit 0/2/3
+node scripts/check_env.mjs --json    # machine readable
+```
+
+Exit codes: `0` usable, `2` no Python at all, `3` Python found but unusable (too old, modules missing,
+interpreter broken). If Python is installed but not on `PATH` (venv, conda, portable build), set
+`DOXYGEN_PYTHON` to the interpreter's absolute path and restart the session.
+
 ### 4. Verify
 
 ```bash
+node scripts/check_env.mjs                      # environment: Python + tree-sitter
 python scripts/parse_function.py --file demo.cpp --list
 ```
 
-If it prints an array of functions, the installation works.
+If the first prints ✅ and the second prints an array of functions, the installation works.
 
 ## Quick start
 
@@ -281,7 +304,8 @@ python scripts/install_snippets.py --uninstall --apply    # remove the snippets 
 - Python 3.10+, on Windows / Linux / macOS (the scripts handle Windows console encoding).
 - C/C++ sources; Qt projects work as-is (`signals:`/`slots:` regions are covered).
 - Host-agnostic: any agent with Bash plus file read/write tools can drive it — no specific IDE or
-  plugin required.
+  plugin required. The environment probe (`scripts/check_env.mjs`) additionally needs Node, which DSH
+  bundles; manual installs in other hosts can fall back to the table in [Environment preflight](#3-dependencies).
 
 ## License
 
@@ -311,6 +335,10 @@ Repository: <https://github.com/FantastyQAQ/dsh-doxygen>
   纯格式化（空格、`*`/`&` 位置）改动不会导致指纹变化。
 - **默认不落盘**：先输出 diff，`--write` 才写回；写回时保持目标文件原有的 CRLF/LF 与
   UTF-8 / UTF-8-BOM / GBK 编码。
+- **没装 Python 时提前拦下**：插件注册技能时就探测 Python 3.10+ 与 `tree-sitter`，把结论写进技能正文
+  最上方；解释器缺失或损坏时，技能会要求助手**立即停止**并转告安装步骤，而不是让 shell 报错变成
+  「没找到函数」的假结论。`node scripts/check_env.mjs` 可随时手动复检——它是纯 Node 脚本，
+  没有 Python 的机器上也能跑。
 - **中文友好**：脚本强制 UTF-8 输出，规避 Windows 控制台 GBK 造成的中文乱码。
 
 ### 目录结构
@@ -331,7 +359,10 @@ doxygen-comment/
 └── scripts/
     ├── parse_function.py     # 读：定位函数 + 解析签名（无副作用）
     ├── gen_doxygen.py        # 写：渲染 / 插入 / 补全 / 指纹 / diff / 扫描
-    └── install_snippets.py   # 可选：把片段合并进 VS Code 系 IDE
+    ├── install_snippets.py   # 可选：把片段合并进 VS Code 系 IDE
+    ├── check_env.mjs         # 环境预检（Node 脚本，没装 Python 也能跑）
+    └── lib/
+        └── env.mjs           # 预检实现；index.js 注册技能时也走它
 ```
 
 ### 安装
@@ -386,13 +417,27 @@ pip install -r requirements.txt
 实测组合 `tree-sitter 0.26.0` + `tree-sitter-cpp 0.23.4`；脚本对 0.22 前后的 `Language`/`Parser`
 构造 API 都做了兼容。Windows 下统一写 `python`（`python3` 在部分环境是别名陷阱）。
 
+**目标机器没装 Python 时，插件不会带着半截错误继续跑。** 以插件方式安装时，`index.js` 在注册技能
+的那一刻就探测一次环境，把结论放在技能正文最上方的「环境自检」提示块里：没装 Python / 版本过低 /
+缺 `tree_sitter` 模块时，提示块会写字面指令，要求助手**立即停止**调用脚本，并把安装步骤转告用户。
+探测本身是纯 Node 脚本（DSH 自带 Node），所以在**没有 Python 的机器上照样能跑出结论**：
+
+```bash
+node scripts/check_env.mjs           # 人看：✅/❌ + 安装步骤
+node scripts/check_env.mjs --json    # 机器看
+```
+
+退出码：`0` 可用、`2` 完全没装 Python、`3` 装了但不可用（版本过低 / 缺模块 / 解释器损坏）。
+Python 不在 `PATH` 上（venv、conda、绿色版）时，把 `DOXYGEN_PYTHON` 设为解释器绝对路径后重启会话即可。
+
 #### 4. 验证
 
 ```bash
+node scripts/check_env.mjs                      # 环境：Python + tree-sitter
 python scripts/parse_function.py --file demo.cpp --list
 ```
 
-能打印出函数数组即安装成功。
+第一条输出 ✅、第二条打印出函数数组，即安装成功。
 
 ### 快速开始
 
@@ -552,6 +597,8 @@ python scripts/install_snippets.py --uninstall --apply   # 撤销
 - Python 3.10+，Windows / Linux / macOS 均可（脚本对 Windows 控制台编码做了处理）。
 - C/C++ 源码；Qt 工程可直接用（`signals:`/`slots:` 区域已覆盖）。
 - 宿主无关：只要有 Bash + 文件读写工具即可驱动，不依赖特定 IDE 或插件。
+  环境预检脚本 `scripts/check_env.mjs` 额外需要 Node（DSH 自带）；非 DSH 宿主若没有 Node，
+  直接按安装章节的手工方式执行 `python -c "import tree_sitter, tree_sitter_cpp"` 也能自检。
 
 ### 许可
 

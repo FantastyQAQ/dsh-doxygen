@@ -43,7 +43,43 @@ GEN="${SKILL_DIR}/scripts/gen_doxygen.py"
 
 安装方法见 `README.md`；脚本不含任何工程硬编码，换工程后无需重装。
 
+## 环境预检（第一步，必做）
+
+本技能的全部脚本（`parse_function.py` / `gen_doxygen.py` / `install_snippets.py`）都是
+**Python 脚本**，依赖 Python 3.10+ 与 `tree-sitter` / `tree-sitter-cpp`。
+DSH 以插件方式安装时，`index.js` 会在注册技能时执行一次环境探测，并把结论放在本文件
+**最上方**的「环境自检」提示块里；手工安装（没有 `index.js`）或提示块缺失时，先自己执行一次：
+
+```bash
+node "${SKILL_DIR}/scripts/check_env.mjs"
+```
+
+判断与处理：
+
+| 结论 | 含义 | 你应该做什么 |
+|---|---|---|
+| ✅ | 解释器与两个依赖模块都可用 | 正常执行下面的工作流 |
+| ❌ 未找到 Python | 机器上没有解释器（或只有 Microsoft Store 占位符） | **停止**：不调用任何脚本，把提示块里的安装步骤转告用户 |
+| ❌ 版本过低 | 找到了解释器但低于 3.10 | **停止**：让用户升级 Python 后重装依赖 |
+| ❌ 缺少模块 | 解释器可用但 `tree_sitter` / `tree_sitter_cpp` 缺失 | **停止**：给出 `python -m pip install tree-sitter tree-sitter-cpp` |
+| ❌ 执行失败 | 解释器损坏、权限不足等 | **停止**：把原始错误原样转告用户 |
+
+硬性要求：
+
+- 环境未通过时**不得**执行本技能的任何 Python 脚本，**不得**把 shell 报错
+  （如「'python' 不是内部或外部命令」）解释成「没找到函数」「文件里没有注释」，
+  也**不得**跳过脚本直接手写注释冒充生成结果。应当用一句话把结论告诉用户：
+  缺什么、怎么装（照抄提示块里的步骤即可），然后等用户处理。
+- 用户装好后，重新执行 `check_env.mjs` 确认 ✅；提示块是注册时生成的，重启会话才会刷新。
+- Python 不在 PATH 上（venv / conda / 绿色版）时，让用户设置 `DOXYGEN_PYTHON=<解释器绝对路径>`
+  后重启会话，或在命令里直接写该绝对路径。
+
+`check_env.mjs` 本身是 Node 脚本（DSH 自带 Node），所以**在没有 Python 的机器上也能运行**——
+这正是它能用来检测「没有 Python」的前提。
+
 ## 工作流
+
+下面的每个场景都假定环境预检已通过；未通过时停在上一节，不要进入工作流。
 
 ### 场景 A：用户光标位于函数上，请求生成函数注释（主场景）
 
@@ -264,6 +300,8 @@ python gen_doxygen.py --scan <目录>
 - Python 3.10+
 - `tree-sitter`、`tree-sitter-cpp`：`pip install tree-sitter tree-sitter-cpp`
   （实测 0.26 / 0.23.4 可用；脚本对 0.22 前后的 API 均做了兼容）
+- 调用前先做[环境预检](#环境预检第一步必做)：`node "${SKILL_DIR}/scripts/check_env.mjs"`
+  （退出码 0=可用 / 2=没装 Python / 3=装了但不可用）；未通过时不要调用脚本。
 - 两个脚本都把 stdout/stderr 强制成 UTF-8 输出，避免 Windows 控制台 GBK 造成中文乱码。
 
 ## 模板列表

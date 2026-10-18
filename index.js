@@ -8,6 +8,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { buildSkillNote, probePython } from './scripts/lib/env.mjs'
+
 const name = 'doxygen-comment'
 const inject = ['skills']
 
@@ -60,6 +62,23 @@ function apply(ctx) {
   // variable name.
   const resolved = `> 运行时路径：本技能由 DSH 插件 \`dsh-doxygen\` 安装，\`\${SKILL_DIR}\` = \`${base}\`。\n\n`
 
+  // Every script of the skill is Python. On a machine without a Python
+  // interpreter the agent would otherwise hit an OS-specific shell error and
+  // carry on as if the function was simply "not found". Probe once here and put
+  // the verdict at the very top of the skill body, where it cannot be missed.
+  let envNote = ''
+  try {
+    const report = probePython()
+    envNote = buildSkillNote(report, base)
+    if (!report.ok) {
+      ctx.logger?.warn?.(`[${name}] Python 环境自检未通过（${report.status}）：${report.command}`)
+    }
+  } catch (error) {
+    // A probe failure must never take the plugin down: keep the skill usable and
+    // let the agent run scripts/check_env.mjs itself.
+    ctx.logger?.warn?.(`[${name}] Python 探测失败：${error?.message || error}`)
+  }
+
   // Registrations are effects: the registry keeps its layer entry on the
   // dsh-skill context, so a bare register() call would outlive this plugin
   // (HMR, disable/re-enable) and keep serving the old SKILL.md. Wrapping it in
@@ -69,7 +88,7 @@ function apply(ctx) {
       name: meta.name || name,
       description: meta.description || FALLBACK_DESCRIPTION,
       ...(meta.whenToUse ? { whenToUse: meta.whenToUse } : {}),
-      content: resolved + content,
+      content: envNote + resolved + content,
       source: 'runtime',
       resourceBase: { kind: 'directory', path: base },
       metadata: {
