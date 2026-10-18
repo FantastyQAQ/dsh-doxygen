@@ -66,8 +66,12 @@ Two ways in — as a DSH plugin bundle, or by copying the folder into a skills d
 **As a DSH plugin.** The repository root declares `dsh.bundle`, so it installs like any other plugin:
 
 ```bash
-dsh plugin add github:FantastyQAQ/dsh-doxygen
+dsh plugin --profile desktop add github:FantastyQAQ/dsh-doxygen
 ```
+
+`desktop` is the profile the desktop app uses — swap in your own profile name (`desktop+office`, etc.).
+The `--profile` flag is **required** by current hosts (0.2.1 and newer); `dsh plugin add ...` alone fails
+with `required option '--profile <name>' not specified`.
 
 `index.js` registers `SKILL.md` as the `doxygen-comment` skill and resolves `${SKILL_DIR}` for you,
 so no path guessing is needed.
@@ -347,8 +351,12 @@ git clone https://github.com/FantastyQAQ/dsh-doxygen.git
 **装成 DSH 插件**（DeepSeek Harness）：仓库根声明了 `dsh.bundle`，按普通插件安装即可：
 
 ```bash
-dsh plugin add github:FantastyQAQ/dsh-doxygen
+dsh plugin --profile desktop add github:FantastyQAQ/dsh-doxygen
 ```
+
+`desktop` 是桌面应用使用的 profile，换成你自己的 profile 名即可（如 `desktop+office`）。
+当前宿主（0.2.1 及更新）**必须**带 `--profile`：只敲 `dsh plugin add ...` 会报
+`required option '--profile <name>' not specified`。
 
 `index.js` 会把 `SKILL.md` 注册为 `doxygen-comment` 技能，并自动注入 `${SKILL_DIR}`，不必自己找路径。
 

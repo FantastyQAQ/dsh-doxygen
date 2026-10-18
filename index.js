@@ -5,7 +5,7 @@
 // registers the same directory that manual installations copy into a host's
 // skills folder.
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const name = 'doxygen-comment'
@@ -16,6 +16,11 @@ const FALLBACK_DESCRIPTION =
 
 const here = dirname(fileURLToPath(import.meta.url))
 const skillFile = join(here, 'SKILL.md')
+
+// `here` is a native path; the host's skill contract addresses resources with
+// POSIX separators (its own reference plugins normalize the same way), so
+// publish the forward-slash spelling and keep `${SKILL_DIR}` readable in both.
+const base = here.split(sep).join('/')
 
 /** Minimal frontmatter reader: scalar keys only, which is all SKILL.md uses. */
 function parseFrontmatter(text) {
@@ -53,20 +58,26 @@ function apply(ctx) {
   // The skill body refers to ${SKILL_DIR}; a plugin install lives under the
   // profile's node_modules, so resolve it here instead of guessing a host
   // variable name.
-  const resolved = `> 运行时路径：本技能由 DSH 插件 \`dsh-doxygen\` 安装，\`\${SKILL_DIR}\` = \`${here}\`。\n\n`
+  const resolved = `> 运行时路径：本技能由 DSH 插件 \`dsh-doxygen\` 安装，\`\${SKILL_DIR}\` = \`${base}\`。\n\n`
 
-  ctx.skills.register({
-    name: meta.name || name,
-    description: meta.description || FALLBACK_DESCRIPTION,
-    ...(meta.whenToUse ? { whenToUse: meta.whenToUse } : {}),
-    content: resolved + content,
-    source: 'runtime',
-    resourceBase: { kind: 'directory', path: here },
-    metadata: {
-      package: 'dsh-doxygen',
-      bundled: ['SKILL.md', 'scripts', 'assets', 'references'],
-    },
-  })
+  // Registrations are effects: the registry keeps its layer entry on the
+  // dsh-skill context, so a bare register() call would outlive this plugin
+  // (HMR, disable/re-enable) and keep serving the old SKILL.md. Wrapping it in
+  // ctx.effect() gives the plugin its own disposer, as the contract requires.
+  return ctx.effect(() =>
+    ctx.skills.register({
+      name: meta.name || name,
+      description: meta.description || FALLBACK_DESCRIPTION,
+      ...(meta.whenToUse ? { whenToUse: meta.whenToUse } : {}),
+      content: resolved + content,
+      source: 'runtime',
+      resourceBase: { kind: 'directory', path: base },
+      metadata: {
+        package: 'dsh-doxygen',
+        bundled: ['SKILL.md', 'scripts', 'assets', 'references'],
+      },
+    }),
+  )
 }
 
 export { apply, inject, name }

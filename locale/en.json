@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-doxygen",
+    "description": "Doxygen comment skill for C/C++ (including Qt) sources: locate functions by line or name, derive the signature, emit @brief/@param/@return comments, and flag comments stale through signature fingerprints."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-doxygen",
+    "description": "为 C/C++（含 Qt）源码生成与维护 Doxygen 注释的技能：按行号或函数名定位函数、自动取签名、生成 @brief/@param/@return，并用签名指纹标记过期注释。"
+  }
+}

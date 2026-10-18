@@ -8,7 +8,9 @@
   "exports": {
     ".": "./index.js",
     "./package.json": "./package.json",
-    "./cordis.patch.yml": "./cordis.patch.yml"
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
   },
   "files": [
     "index.js",
@@ -18,6 +20,8 @@
     "assets",
     "references",
     "requirements.txt",
+    "locale/*.json",
+    "icon.svg",
     "README.md",
     "LICENSE"
   ],
