@@ -4,6 +4,11 @@
   "description": "Doxygen comment generator and maintainer for C/C++ (including Qt) sources, shipped as a DeepSeek Harness skill bundle.",
   "type": "module",
   "license": "MIT",
+  "author": "FantastyQAQ (https://github.com/FantastyQAQ)",
+  "homepage": "https://github.com/FantastyQAQ/dsh-doxygen#readme",
+  "bugs": {
+    "url": "https://github.com/FantastyQAQ/dsh-doxygen/issues"
+  },
   "main": "index.js",
   "exports": {
     ".": "./index.js",
