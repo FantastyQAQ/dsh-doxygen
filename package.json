@@ -1,6 +1,6 @@
 {
   "name": "dsh-doxygen",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Doxygen comment generator and maintainer for C/C++ (including Qt) sources, shipped as a DeepSeek Harness skill bundle.",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,8 @@
     "url": "git+https://github.com/FantastyQAQ/dsh-doxygen.git"
   },
   "engines": {
-    "node": "^22.19.0 || >=24"
+    "node": "^22.19.0 || >=24",
+    "dsh": ">=0.2.0-rc.1"
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-skill": ">=0.0.1-rc.1 <0.1.0 || >=0.1.0-rc.1 <0.2.0-0 || >=0.2.0-rc.1 <0.3.0-0"

@@ -46,14 +46,14 @@ function parseFrontmatter(text) {
 
 function apply(ctx) {
   if (!existsSync(skillFile)) {
-    ctx.logger?.warn?.(`[${name}] SKILL.md not found at ${skillFile}`)
+    ctx.get('logger')?.warn?.(`[${name}] SKILL.md not found at ${skillFile}`)
     return
   }
 
   const { meta, body } = parseFrontmatter(readFileSync(skillFile, 'utf8'))
   const content = body.trimStart()
   if (!content) {
-    ctx.logger?.warn?.(`[${name}] SKILL.md has no body`)
+    ctx.get('logger')?.warn?.(`[${name}] SKILL.md has no body`)
     return
   }
 
@@ -71,12 +71,12 @@ function apply(ctx) {
     const report = probePython()
     envNote = buildSkillNote(report, base)
     if (!report.ok) {
-      ctx.logger?.warn?.(`[${name}] Python 环境自检未通过（${report.status}）：${report.command}`)
+      ctx.get('logger')?.warn?.(`[${name}] Python 环境自检未通过（${report.status}）：${report.command}`)
     }
   } catch (error) {
     // A probe failure must never take the plugin down: keep the skill usable and
     // let the agent run scripts/check_env.mjs itself.
-    ctx.logger?.warn?.(`[${name}] Python 探测失败：${error?.message || error}`)
+    ctx.get('logger')?.warn?.(`[${name}] Python 探测失败：${error?.message || error}`)
   }
 
   // Registrations are effects: the registry keeps its layer entry on the

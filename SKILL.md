@@ -1,7 +1,6 @@
 ---
 name: doxygen-comment
 description: 为 C/C++（含 Qt）源码生成与维护 Doxygen 注释（文件头/函数/模块/行尾/简短注释）。当用户请求「给函数加注释」「生成文件头注释」「补全 @brief/@param/@return」「批量给源码补 Doxygen 注释」「检查注释是否过期」，或提到片段前缀 doxygen_source / doxygen_fun / doxygen_module_head / doxygen_module_end / doxygen_rear / doxygen_nom 时使用。内置解析脚本可按行号或函数名定位函数、自动取签名并判定参数方向，生成后靠签名指纹支持「代码改了、注释自动标记过期」的维护流程。不要用于普通业务注释或非 Doxygen 风格的注释。
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Doxygen Comment
